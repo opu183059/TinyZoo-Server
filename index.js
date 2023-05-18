@@ -23,7 +23,6 @@ async function run() {
   try {
     await client.connect();
     console.log("connected to MongoDB!");
-
     const toyDb = client.db("toyDb").collection("toy");
 
     app.post("/addToy", async (req, res) => {
@@ -33,7 +32,6 @@ async function run() {
       console.log(result);
       res.send(result);
     });
-
     app.get("/allToy", async (req, res) => {
       const result = await toyDb.find({}).toArray();
       res.send(result);
