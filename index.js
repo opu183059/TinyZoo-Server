@@ -24,7 +24,20 @@ async function run() {
     await client.connect();
     console.log("connected to MongoDB!");
     const toyDb = client.db("toyDb").collection("toy");
+    // indexing
+    const indexKeys = { toyname: 1 };
+    const indexOption = { name: "toynameindx" };
+    const result = await toyDb.createIndex(indexKeys, indexOption);
 
+    app.get("/toysearch/:name", async (req, res) => {
+      const name = req.params.name;
+      const result = await toyDb
+        .find({ toyname: { $regex: name, $options: "i" } })
+        .toArray();
+      res.send(result);
+    });
+
+    // add toys to db
     app.post("/addToy", async (req, res) => {
       const body = req.body;
       body.createdAt = new Date();
