@@ -27,16 +27,22 @@ async function run() {
 
     app.post("/addToy", async (req, res) => {
       const body = req.body;
+      body.createdAt = new Date();
       // console.log(body);
       const result = await toyDb.insertOne(body);
       console.log(result);
       res.send(result);
     });
+    // get all toys
     app.get("/allToy", async (req, res) => {
-      const result = await toyDb.find({}).toArray();
+      const result = await toyDb
+        .find({})
+        .sort({ createdAt: -1 })
+        .limit(20)
+        .toArray();
       res.send(result);
     });
-
+    // get toy through sub-category name
     app.get("/allToy/:toyName", async (req, res) => {
       // console.log(req.params.toyName);
       if (
@@ -47,11 +53,21 @@ async function run() {
         // const category = subCategory[0]?.value;
         const result = await toyDb
           .find({ "subCategory.value": req.params.toyName })
+          .sort({ createdAt: -1 })
           .toArray();
         // console.log(result);
         return res.send(result);
       }
     });
+
+    app.get("/mytoy/:email", async (req, res) => {
+      // console.log(req.params.email);
+      const result = await toyDb
+        .find({ sellerEmail: req.params.email })
+        .toArray();
+      res.send(result);
+    });
+    // ends --------------------------------------------------------------------------------
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
