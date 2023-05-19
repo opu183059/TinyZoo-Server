@@ -36,6 +36,22 @@ async function run() {
       const result = await toyDb.find({}).toArray();
       res.send(result);
     });
+
+    app.get("/allToy/:toyName", async (req, res) => {
+      // console.log(req.params.toyName);
+      if (
+        req.params.toyName == "lion" ||
+        req.params.toyName == "cats" ||
+        req.params.toyName == "dianoasur"
+      ) {
+        // const category = subCategory[0]?.value;
+        const result = await toyDb
+          .find({ "subCategory.value": req.params.toyName })
+          .toArray();
+        // console.log(result);
+        return res.send(result);
+      }
+    });
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
