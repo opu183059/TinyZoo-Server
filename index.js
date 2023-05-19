@@ -74,7 +74,7 @@ async function run() {
         return res.send(result);
       }
     });
-
+    // get toy by email id
     app.get("/mytoy/:email", async (req, res) => {
       // console.log(req.params.email);
       const result = await toyDb
@@ -82,7 +82,38 @@ async function run() {
         .toArray();
       res.send(result);
     });
+    // update function
+    app.get("/toyupdate/:id", async (req, res) => {
+      // console.log(req.params.id);
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await toyDb.findOne(query);
+      res.send(result);
+    });
+    // update by put
+    app.put("/toyupdate/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const option = { upsert: true };
+      const updatedToy = req.body;
+      const updtdToy = {
+        $set: {
+          sellerName: updatedToy.sellerName,
+          toyname: updatedToy.toyname,
+          sellerEmail: updatedToy.sellerEmail,
+          Rating: updatedToy.Rating,
+          photoURL: updatedToy.photoURL,
+          description: updatedToy.description,
+          subCategory: updatedToy.subCategory,
+          Price: updatedToy.Price,
+          Available: updatedToy.Available,
+        },
+      };
+      const result = await toyDb.updateOne(query, updtdToy, option);
+      res.send(result);
+    });
 
+    // delete function
     app.delete("/toydelete/:id", async (req, res) => {
       // console.log(req.params.id);
       const id = req.params.id;
