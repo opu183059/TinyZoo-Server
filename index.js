@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const app = express();
 const port = process.env.PORT || 5000;
 
@@ -28,11 +28,13 @@ async function run() {
     const indexKeys = { toyname: 1 };
     const indexOption = { name: "toynameindx" };
     const result = await toyDb.createIndex(indexKeys, indexOption);
-
+    // search by name
     app.get("/toysearch/:name", async (req, res) => {
       const name = req.params.name;
       const result = await toyDb
         .find({ toyname: { $regex: name, $options: "i" } })
+        .sort({ createdAt: -1 })
+        .limit(20)
         .toArray();
       res.send(result);
     });
@@ -80,6 +82,23 @@ async function run() {
         .toArray();
       res.send(result);
     });
+
+    app.delete("/toydelete/:id", async (req, res) => {
+      // console.log(req.params.id);
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await toyDb.deleteOne(query);
+      res.send(result);
+    });
+
+    // app.delete("/toy/:id", async (req, res) => {
+    //   console.log(req.params.id);
+    //   const query = { _id: new ObjectId(id) };
+    //   const result = await toyDb.deleteOne(query);
+    //   res.send(result);
+    // });
+
+    // --------------------------------------------------------------------
     // ends --------------------------------------------------------------------------------
   } finally {
     // Ensures that the client will close when you finish/error
