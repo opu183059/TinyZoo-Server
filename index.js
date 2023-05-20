@@ -6,6 +6,13 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 app.use(cors());
+// const corsConfig = {
+//   origin: "",
+//   credentials: true,
+//   methods: ["GET", "POST", "PUT", "DELETE"],
+// };
+// app.use(cors(corsConfig));
+// app.options("", cors(corsConfig));
 app.use(express.json());
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.ljsyrma.mongodb.net/?retryWrites=true&w=majority`;
@@ -21,13 +28,13 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
-    await client.connect();
-    console.log("connected to MongoDB!");
+    // await client.connect();
+    // console.log("connected to MongoDB!");
     const toyDb = client.db("toyDb").collection("toy");
     // indexing
-    const indexKeys = { toyname: 1 };
-    const indexOption = { name: "toynameindx" };
-    const result = await toyDb.createIndex(indexKeys, indexOption);
+    // const indexKeys = { toyname: 1 };
+    // const indexOption = { name: "toynameindx" };
+    // const result = await toyDb.createIndex(indexKeys, indexOption);
     // search by name
     app.get("/toysearch/:name", async (req, res) => {
       const name = req.params.name;
@@ -36,7 +43,7 @@ async function run() {
         .sort({ createdAt: -1 })
         .limit(20)
         .toArray();
-      res.send(result);
+      res.json(result);
     });
 
     // add toys to db
@@ -46,7 +53,7 @@ async function run() {
       // console.log(body);
       const result = await toyDb.insertOne(body);
       console.log(result);
-      res.send(result);
+      res.json(result);
     });
     // get all toys
     app.get("/allToy", async (req, res) => {
@@ -55,7 +62,7 @@ async function run() {
         .sort({ createdAt: -1 })
         .limit(20)
         .toArray();
-      res.send(result);
+      res.json(result);
     });
     // get toy through sub-category name
     app.get("/allToy/:toyName", async (req, res) => {
@@ -71,7 +78,7 @@ async function run() {
           .sort({ createdAt: -1 })
           .toArray();
         // console.log(result);
-        return res.send(result);
+        return res.json(result);
       }
     });
     // get toy by email id
@@ -79,8 +86,9 @@ async function run() {
       // console.log(req.params.email);
       const result = await toyDb
         .find({ sellerEmail: req.params.email })
+        .sort({ createdAt: -1 })
         .toArray();
-      res.send(result);
+      res.json(result);
     });
     // update function
     app.get("/toyupdate/:id", async (req, res) => {
@@ -88,7 +96,7 @@ async function run() {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await toyDb.findOne(query);
-      res.send(result);
+      res.json(result);
     });
     // update by put
     app.put("/toyupdate/:id", async (req, res) => {
@@ -110,7 +118,7 @@ async function run() {
         },
       };
       const result = await toyDb.updateOne(query, updtdToy, option);
-      res.send(result);
+      res.json(result);
     });
 
     // delete function
@@ -119,15 +127,8 @@ async function run() {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await toyDb.deleteOne(query);
-      res.send(result);
+      res.json(result);
     });
-
-    // app.delete("/toy/:id", async (req, res) => {
-    //   console.log(req.params.id);
-    //   const query = { _id: new ObjectId(id) };
-    //   const result = await toyDb.deleteOne(query);
-    //   res.send(result);
-    // });
 
     // --------------------------------------------------------------------
     // ends --------------------------------------------------------------------------------
